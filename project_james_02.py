@@ -107,11 +107,11 @@ def menu_main():
         if menu_sel.startswith("add") or menu_sel == "1":
             add_new_contact()
         elif menu_sel.startswith("edit") or menu_sel == "2":
-            menu_edit()
+            menu_search("edit")
         elif menu_sel.startswith("delete") or menu_sel == "3":
-            menu_del()
+            menu_search("delete")
         elif menu_sel.startswith("search") or menu_sel == "4":
-            menu_search()
+            menu_search("view")
         elif menu_sel.startswith("display") or menu_sel == "5":
             display_all_contacts()
         elif menu_sel.startswith("export") or menu_sel == "6":
@@ -124,12 +124,53 @@ def menu_main():
         else:
             print("Invalid input. Please make a selection from the menu.")
 
-def menu_edit():    # <-- but I need a way to determine which contact to edit-- employ the search function?
+def menu_search(action):
+    '''
+    Handle searching for contact to modify or view.
+    '''
+    while True:
+        # get search term for contact from user
+        menu_input = input(f"Which contact would you like to {action}? ")
+
+        # handle search cancel - return to main menu
+        if menu_input == "cancel":
+            break
+
+        # search for contact to modify or view
+        contact = search_for_contact(menu_input)
+        if contact != None:
+            if action == "edit":
+                edit_contact(contact)
+            elif action == "delete":
+                delete_contact(contact)
+            else:
+                display_contact(contact)
+            # return to main menu after function call
+            break
+
+        # handle contact not found
+        else:
+            print("Enter a different search term or enter \"cancel\" to return to the main menu.")
+# I'm maybe making too much work for myself here, but would it be nice, after searching for a specific contact to offer the ability to edit or delete contact? We'd just have to break up the delete/edit functions a little further
+
+def edit_contact(contact):
+    # display_contact(contact) # <-- display with numbers? may require another check in display_contact
+    # 1 - First Name
+    # 2 - Last Name
+    # ... etc
+    # field_to_edit = input("Which field would you like to edit? ")
+    # old_value = contact_dictionary[contact_to_edit][field_to_edit]
+    # new_value = input(f"What is the new value for {field_to_edit}? ")
+    # confirmation_binary = input(f"Are you sure you want to update {old_value} to {new_value} for the {field_to_edit} field in your {first_name}{last_name} contact? (yes/no))
+    # if yes: contact_dictionary[contact_to_edit][field_to_edit] = new_value
+    # if no: "Your contact has been updated!"
+    # either way, return to edit contact sub_menu
+
+    # TO-DO: edit all option using same functionality as add_new_contact()? # 8 - Edit All
+    # TO-DO: add field??                                                    # 9 - Add New Field
+
     pass
-def menu_del():     # <-- same^
-    pass
-def menu_search():  # so are these three ^^ all just calling the search function with different prompts?
-    pass
+
 
 def add_new_contact():
     '''
@@ -161,12 +202,23 @@ def add_new_contact():
     
     
   
-def edit_contact():         # <-- DELETE??
-    pass
 def delete_contact():       # <-- deleting is easy; question is, should that id number be put back into circulation?
     pass
-def search_for_contact():   # <-- okay so this one will need to do some heavy lifting; return id?
-    pass
+
+def search_for_contact(search_term):   # <-- okay so this one will need to do some heavy lifting; return id?
+    for contact in contacts_dictionary:
+        for field in contact:
+            if search_term.casefold() in contacts_dictionary[contact][field].casefold():
+                print("Found the following contact:")
+                display_contact(contact)
+                confirm_input = input("Is this the contact you are looking for? (yes/no): ").casefold()
+                if confirm_input == "yes" or confirm_input == "y":
+                    return contact
+                # otherwise, keep searching!
+    # if no one found:
+    print(f"Contact not found with search term \"{search_term}\"")
+    return None
+
 def display_contact(contact):
     '''
     Display single contact with passed-in id number.
