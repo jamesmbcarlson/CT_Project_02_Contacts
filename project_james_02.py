@@ -63,21 +63,26 @@ Menu:
 - Custom Contact Fields (Bonus): Allow users to define custom fields for contacts (e.g., birthdays, anniversaries) and store this information.
 '''
 
+# format constants
+F_UNDERLINE = "\033[4m"
+F_RESET = "\033[0m"
+
+contacts_dictionary = {}
 # nexted dictionary format
-contacts = {
-    "id_0001" : {
-        "name_last" : "", # * no field should be required? but if the entry is entirely empty, delete the entry?
-        "name first" : "",
-        "phone" : "",
-        "email" : "",
-        "address" : "", # address? does that include city, state, zip code? We could go on for a while here...
-        "group" : [], # keep running list of existing groups to both display to users and to compare against
-        "notes" : ""
-        },  # <-- if we allow users to add custom categories, how can we include that in new contacts, existing contacts, imported contacts...?? Food for thought
-    "id_0002" : {
-        # and so forth
-    },
-}
+# contacts_dictionary = {
+#     "id_0001" : {
+#         "name_last" : "", # * no field should be required? but if the entry is entirely empty, delete the entry?
+#         "name first" : "",
+#         "phone" : "",
+#         "email" : "",
+#         "address" : "", # address? does that include city, state, zip code? We could go on for a while here...
+#         "group" : [], # keep running list of existing groups to both display to users and to compare against
+#         "notes" : ""
+#         },  # <-- if we allow users to add custom categories, how can we include that in new contacts, existing contacts, imported contacts...?? Food for thought
+#     "id_0002" : {
+#         # and so forth
+#     },
+# }
 
 def menu_main():
     '''
@@ -85,7 +90,7 @@ def menu_main():
     '''
     while True:
         # display main menu
-        print("Menu")
+        print(f"\n{F_UNDERLINE}Main Menu{F_RESET}")
         print("1. Add a new contact")   # <-- auto backup??v
         print("2. Edit an existing contact") # <-- custom contact fields here?
         print("3. Delete a contact")
@@ -96,7 +101,8 @@ def menu_main():
         print("8. Quit")
 
         # take and handle user selection
-        menu_sel = input("Please make a selection: ").casefold()
+        menu_sel = input("\nPlease make a selection: ").casefold()
+        print()
 
         if menu_sel.startswith("add") or menu_sel == "1":
             add_new_contact()
@@ -125,18 +131,60 @@ def menu_del():     # <-- same^
 def menu_search():  # so are these three ^^ all just calling the search function with different prompts?
     pass
 
-def add_new_contact():      # <-- Add line by line
-    pass
+def add_new_contact():
+    '''
+    Add new contact to contact dictionary using user input for details.
+    '''
+    # set id to number not yet in dictionary
+    contact_id = "id_" + str(len(contacts_dictionary)+1).zfill(4)
+    print("Please fill out the following fields. You can also skip a field by leaving it empty.") # should I include a way to cancel??
+    name_first = input("Contact's First Name: ")
+    name_last = input("Contact's Last Name: ")
+    phone = input("Contact's Phone Number: ")
+    email = input("Contact's Email Address: ")
+    address = input("Contact's Address: ")
+    # TO-DO: group = input(f"Add any groups this contact should be sorted by (family/friends): ")
+    notes = input("Enter any additional notes: ")
+
+    # TO-DO: check for entirely empty contact? warn user no contact has been/will be added
+
+    contacts_dictionary.update({contact_id : {
+        "name_first" : name_first,
+        "name_last" : name_last,
+        "phone" : phone,
+        "email" : email,
+        "address" : address,
+        # TO-DO: groups!
+        "notes" : notes
+    }})
+    
+    
+    
+  
 def edit_contact():         # <-- DELETE??
     pass
 def delete_contact():       # <-- deleting is easy; question is, should that id number be put back into circulation?
     pass
 def search_for_contact():   # <-- okay so this one will need to do some heavy lifting; return id?
     pass
-def display_contact(contact):   # <-- use this anytime contact(s) need to be displayed
-    pass
-def display_all_contacts():     # <-- print them all in a for loop, easy peasy
-    pass
+def display_contact(contact):
+    '''
+    Display single contact with passed-in id number.
+    '''
+    print(f"Name: {contacts_dictionary[contact]["name_first"]} {contacts_dictionary[contact]["name_last"]}")
+    print(f"Phone: {contacts_dictionary[contact]["phone"]}")
+    print(f"Email: {contacts_dictionary[contact]["email"]}")
+    print(f"Address: {contacts_dictionary[contact]["address"]}")
+    # TO-DO: groups!
+    print(f"Notes: {contacts_dictionary[contact]["notes"]}")
+
+def display_all_contacts():
+    '''
+    Display all contacts, looping through entire contact dictionary.
+    '''
+    for contact in contacts_dictionary:
+        display_contact(contact)
+
 def export_contacts():      # <-- good thing I didn't just learn to do this today haha
     pass
 def import_contacts():      # <-- you're a mad man, Jim
@@ -144,5 +192,5 @@ def import_contacts():      # <-- you're a mad man, Jim
 
 
 
-print("Welcome to the Contact Management System!\n")
+print("\nWelcome to the Contact Management System!")
 menu_main()
