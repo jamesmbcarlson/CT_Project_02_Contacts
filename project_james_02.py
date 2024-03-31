@@ -86,7 +86,7 @@ contacts_dictionary = {}
 
 def menu_main():
     '''
-    Display main menu and handle corresponding input.
+    Display main menu and handle corresponding input, looping as long as the program is running.
     '''
     while True:
         # display main menu
@@ -136,6 +136,8 @@ def menu_search(action):
         if menu_input == "cancel":
             break
 
+        # TO-DO: ensure we are not searching for empty fields
+
         # search for contact to modify or view
         contact = search_for_contact(menu_input)
         if contact != None:
@@ -154,23 +156,55 @@ def menu_search(action):
 # I'm maybe making too much work for myself here, but would it be nice, after searching for a specific contact to offer the ability to edit or delete contact? We'd just have to break up the delete/edit functions a little further
 
 def edit_contact(contact):
-    # display_contact(contact) # <-- display with numbers? may require another check in display_contact
-    # 1 - First Name
-    # 2 - Last Name
-    # ... etc
-    # field_to_edit = input("Which field would you like to edit? ")
-    # old_value = contact_dictionary[contact_to_edit][field_to_edit]
-    # new_value = input(f"What is the new value for {field_to_edit}? ")
-    # confirmation_binary = input(f"Are you sure you want to update {old_value} to {new_value} for the {field_to_edit} field in your {first_name}{last_name} contact? (yes/no))
-    # if yes: contact_dictionary[contact_to_edit][field_to_edit] = new_value
-    # if no: "Your contact has been updated!"
-    # either way, return to edit contact sub_menu
+    while True:
+        display_contact(contact, True)
+        field_input = input("Which field would you like to edit? ").casefold()
 
-    # TO-DO: edit all option using same functionality as add_new_contact()? # 8 - Edit All
-    # TO-DO: add field??                                                    # 9 - Add New Field
+        # handle search cancel - return to main menu
+        if field_input == "cancel":
+            break
 
-    pass
+        # edit name field(s)
+        elif field_input == "1" or "name" in field_input:
+            old_value = contacts_dictionary[contact]["name_full"]
+            name_first = input("Contact's First Name: ")
+            name_last = input("Contact's Last Name: ")
+            new_value = f"{name_first} {name_last}"
 
+            # confirm edit for name fields
+            confirm = input(f"Are you sure you want to update {old_value} to {new_value} for your contact? (yes/no) ")
+            if confirm == "yes" or confirm == "y":
+                contacts_dictionary[contact]["name_first"] = name_first
+                contacts_dictionary[contact]["name_last"] = name_last
+                contacts_dictionary[contact]["name_full"] = new_value
+                print(f"Your contact information for {new_value} has been updated!")
+            elif confirm == "no" or confirm == "n":
+                print(f"Your contact informmation for {old_value} has not been updated.")
+
+            # return to main menu
+            break
+
+        elif field_input == "2" or field_input.startswith("phone"):
+            old_value = contacts_dictionary[contact]["phone"]
+            # TO-DO: phone validation
+            new_value = input("Contact's Phone Number: ")
+        elif field_input == "3" or "email" in field_input:
+            old_value = contacts_dictionary[contact]["email"]
+            # TO-DO: email validation
+            new_value = input("Contact's Email Address: ")
+        elif field_input == "4" or field_input.startswith("address"):
+            old_value = contacts_dictionary[contact]["address"]
+            new_value = input("Contact's Address: ")
+        # TO-DO: groups!
+        elif field_input == "5" or "notes" in field_input:          # <-- TO-DO: yo dawg, these selection numbers should be variables so we know they'll match with the contact display
+            # TO-DO: offer choice to overwrite or append?
+            pass
+        # TO-DO: edit all option using same functionality as add_new_contact()? # 8 - Edit All
+        # TO-DO: add field??                                                    # 9 - Add New Field
+
+        # handle contact not found
+        else:
+            print("Invalid input. Enter a field to edit or enter \"cancel\" to return to the main menu.")
 
 def add_new_contact():
     '''
@@ -178,20 +212,24 @@ def add_new_contact():
     '''
     # set id to number not yet in dictionary
     contact_id = "id_" + str(len(contacts_dictionary)+1).zfill(4)
+
+    # TO-DO?? OR-- iterate through dictionary until an available ID is found-- I could see some weirdness with deleting entry causing weird logic
+
     print("Please fill out the following fields. You can also skip a field by leaving it empty.") # should I include a way to cancel??
     name_first = input("Contact's First Name: ")
     name_last = input("Contact's Last Name: ")
-    phone = input("Contact's Phone Number: ")
-    email = input("Contact's Email Address: ")
+    phone = input("Contact's Phone Number: ")   # TO-DO: Add phone validation
+    email = input("Contact's Email Address: ")  # TO-DO: Add email validation
     address = input("Contact's Address: ")
     # TO-DO: group = input(f"Add any groups this contact should be sorted by (family/friends): ")
     notes = input("Enter any additional notes: ")
 
     # TO-DO: check for entirely empty contact? warn user no contact has been/will be added
-
+    
     contacts_dictionary.update({contact_id : {
         "name_first" : name_first,
         "name_last" : name_last,
+        "name_full" : f"{name_first} {name_last}",  # <-- added full name for searching purposes
         "phone" : phone,
         "email" : email,
         "address" : address,
@@ -199,18 +237,20 @@ def add_new_contact():
         "notes" : notes
     }})
     
-    
-    
-  
 def delete_contact():       # <-- deleting is easy; question is, should that id number be put back into circulation?
     pass
 
-def search_for_contact(search_term):   # <-- okay so this one will need to do some heavy lifting; return id?
+def search_for_contact(search_term):
+    '''
+    Loop through all fields in all contacts looking for given search term. Returns contact id if found. Otherwise returns None.
+    '''
     for contact in contacts_dictionary:
-        for field in contact:
+        print(contact)
+        for field in contacts_dictionary[contact]:
+            print(field)
             if search_term.casefold() in contacts_dictionary[contact][field].casefold():
                 print("Found the following contact:")
-                display_contact(contact)
+                display_contact(contact, False)
                 confirm_input = input("Is this the contact you are looking for? (yes/no): ").casefold()
                 if confirm_input == "yes" or confirm_input == "y":
                     return contact
@@ -219,23 +259,34 @@ def search_for_contact(search_term):   # <-- okay so this one will need to do so
     print(f"Contact not found with search term \"{search_term}\"")
     return None
 
-def display_contact(contact):
+def display_contact(contact, is_numbered):
     '''
     Display single contact with passed-in id number.
     '''
+    if is_numbered == True:
+        print("1 - ", end="")
     print(f"Name: {contacts_dictionary[contact]["name_first"]} {contacts_dictionary[contact]["name_last"]}")
+    if is_numbered == True:
+        print("2 - ", end="")
     print(f"Phone: {contacts_dictionary[contact]["phone"]}")
+    if is_numbered == True:
+        print("3 - ", end="")
     print(f"Email: {contacts_dictionary[contact]["email"]}")
+    if is_numbered == True:
+        print("4 - ", end="")
     print(f"Address: {contacts_dictionary[contact]["address"]}")
     # TO-DO: groups!
+    if is_numbered == True:
+        print("5 - ", end="")
     print(f"Notes: {contacts_dictionary[contact]["notes"]}")
+    # TO-DO: print custom fields
 
 def display_all_contacts():
     '''
     Display all contacts, looping through entire contact dictionary.
     '''
     for contact in contacts_dictionary:
-        display_contact(contact)
+        display_contact(contact, False)
 
 def export_contacts():      # <-- good thing I didn't just learn to do this today haha
     pass
