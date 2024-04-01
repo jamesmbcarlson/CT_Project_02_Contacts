@@ -513,26 +513,43 @@ def import_contacts():
     # reset contacts_dictionary
     contacts_dictionary.clear()
 
-    try:
-        with open(DEFAULT_FILENAME, "r") as file:
-            contacts = file.readlines()
-            for contact in contacts:
-                # print(contact.strip())
-                imp_id = re.match(r"id_\d+", contact).group(0)
-                contacts_dictionary[imp_id] = {}
-                contact_contents = re.search(r"{(.*)}", contact).group(1).split(", ")
-                # TO-DO: properly import groups list
-                print(contact_contents)
-                for item in contact_contents:
-                    pair = item.split(": ")
-                    contacts_dictionary[imp_id][re.search(r"\'(.*)\'", pair[0]).group(1)] = re.search(r"\'(.*)\'", pair[1]).group(1)
-                
-                # TO-DO: DELETE THIS DEBUG LINE
-                print(contacts_dictionary[imp_id])
-    except Exception as e:
-        print(f"Error: {e}")
-    else:
-        print("Your contacts have been imported!")
+    # try:
+    with open(DEFAULT_FILENAME, "r") as file:
+        contacts = file.readlines()
+        for contact in contacts:
+            print(contact.strip())
+            imp_id = re.match(r"id_\d+", contact).group(0)
+            contacts_dictionary[imp_id] = {}
+
+            # extract groups - the list creates a format that must be handled differently
+            temp_group = re.search(r"'groups': \[.*\], ", contact)
+            print("temp_group", temp_group.group())
+            parsed_content = contact.replace(temp_group.group(), "")
+            print("parsed_content", parsed_content)
+
+            # parse text and assign dictionary key, value pairs
+            contact_contents = re.search(r"{(.*)}", parsed_content).group(1).split(", ")
+            print(contact_contents)
+            for item in contact_contents:
+                pair = item.split(": ")
+                contacts_dictionary[imp_id][re.search(r"\'(.*)\'", pair[0]).group(1)] = re.search(r"\'(.*)\'", pair[1]).group(1)
+                # TO-DO: using quotes within notes or any other field messes this up... so I gotta figure out how to handle that
+
+            # reinsert groups
+            contacts_dictionary[imp_id][K_GROUPS] = []
+            parsed_list = re.search(r"\[(.*)\]", temp_group.group()).group(1).split(", ")
+            for item in parsed_list:
+                contacts_dictionary[imp_id][K_GROUPS].append(re.search(r"\'(.*)\'", item).group(1))
+            
+
+
+
+            # TO-DO: DELETE THIS DEBUG LINE
+            print(contacts_dictionary[imp_id])
+    # except Exception as e:
+    #     print(f"Error: {e}")
+    # else:
+    #     print("Your contacts have been imported!")
     
     # reset count - wait hold on this could still potentially create overwrites # TO-DO: reconsider how this whole thing works
     global total_contacts
