@@ -17,29 +17,29 @@ Each contact that can be added to the address book can hold the following inform
 
 Using the command-line interface, the user will be prompted with the following options:
 
-1. Add a new contact
+1. Add a new contact - 
     Enter information for a new contact, adding this contact and their details to the address book.
 
-2. Edit an existing contact
+2. Edit an existing contact - 
     Edit the details for a contact currently in the address book.
 
-3. Delete a contact
+3. Delete a contact - 
     Delete a contact currently in the address book.
 
-4. Search for a contact
+4. Search for a contact - 
     Search for a contact by any detail in their entry, be it their name, phone number, email, or another field. This function is also employed by the editing and deleting functions.
 
-5. Display all contacts
+5. Display all contacts - 
     Display the full list of contacts and their details to the terminal.
 
-6. Export contacts to a text file
+6. Export contacts to a text file - 
     Export all data in the program to a saved text file on the user's computer.
 
-7. Import contacts from a text file
+7. Import contacts from a text file - 
     Import data from a saved file, and use it to populate the address book within the program.
     An example file ("contact_directories/my_contacts.txt") has been provided in this project folder and can be loaded into the application using this function.
 
-8. Quit
+8. Quit - 
     Exit the application.
 
 
